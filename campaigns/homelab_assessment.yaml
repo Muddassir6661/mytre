@@ -14,8 +14,8 @@ stages:
   - module: reconnaissance.port_scan:PortScan
     params:
       target: "192.168.0.115"
-      port_range: "1-1024"
-      timeout: 0.5
+      port_range: "20-30"
+      timeout: 0.2
 
   - module: credential_access.ssh_brute:SSHBruteForce
     params:

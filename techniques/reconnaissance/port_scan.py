@@ -36,6 +36,7 @@ class PortScan(Technique):
         open_ports: list[int] = []
 
         for port in range(self.start_port, self.end_port + 1):
+            print(f"[*] Scanning port {port}... ", end="\r")
             try:
                 with socket.create_connection((self.target, port), timeout=self.timeout):
                     open_ports.append(port)
