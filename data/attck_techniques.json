@@ -1,0 +1,12 @@
+[
+  {"id": "T1046",     "name": "Network Service Discovery",          "tactic": "reconnaissance",    "description": "Adversaries may attempt to get a listing of services running on remote hosts and local network infrastructure devices, including those that may be vulnerable to remote software exploitation."},
+  {"id": "T1595",     "name": "Active Scanning",                    "tactic": "reconnaissance",    "description": "Adversaries may execute active reconnaissance scans to gather information that can be used during targeting."},
+  {"id": "T1110",     "name": "Brute Force",                        "tactic": "credential-access", "description": "Adversaries may use brute force techniques to gain access to accounts when passwords are unknown or when password hashes are obtained."},
+  {"id": "T1110.001", "name": "Brute Force: Password Guessing",     "tactic": "credential-access", "description": "Adversaries with no prior knowledge of legitimate credentials within the system or environment may guess passwords to attempt access to accounts."},
+  {"id": "T1078",     "name": "Valid Accounts",                     "tactic": "initial-access",    "description": "Adversaries may obtain and abuse credentials of existing accounts as a means of gaining Initial Access."},
+  {"id": "T1021",     "name": "Remote Services",                    "tactic": "lateral-movement",  "description": "Adversaries may use Valid Accounts to log into a service specifically designed to accept remote connections."},
+  {"id": "T1021.004", "name": "Remote Services: SSH",               "tactic": "lateral-movement",  "description": "Adversaries may use Valid Accounts to log into remote machines using Secure Shell (SSH)."},
+  {"id": "T1041",     "name": "Exfiltration Over C2 Channel",       "tactic": "exfiltration",      "description": "Adversaries may steal data by exfiltrating it over an existing command and control channel."},
+  {"id": "T1560",     "name": "Archive Collected Data",             "tactic": "exfiltration",      "description": "An adversary may compress and/or encrypt data that is collected prior to exfiltration."},
+  {"id": "T1498",     "name": "Network Denial of Service",          "tactic": "impact",            "description": "Adversaries may perform Network Denial of Service (DoS) attacks to degrade or block the availability of targeted resources to users."}
+]

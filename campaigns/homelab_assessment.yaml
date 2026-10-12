@@ -1,0 +1,96 @@
+# campaigns/homelab_assessment.yaml
+#
+# Full 16-technique assessment campaign covering all tactics.
+# Adjust target and parameters to your lab environment.
+
+campaign: homelab_assessment
+
+stages:
+  - module: reconnaissance.port_scan:PortScan
+    params:
+      target: "${TARGET_IP}"
+      port_range: "1-100"
+      timeout: 0.5
+
+  - module: reconnaissance.service_fingerprint:ServiceFingerprint
+    params:
+      target: "${TARGET_IP}"
+      timeout: 2.0
+
+  - module: reconnaissance.vuln_scan:VulnScan
+    params:
+      target: "${TARGET_IP}"
+
+  - module: initial_access.http_default_creds:HTTPDefaultCreds
+    params:
+      target_url: "http://${TARGET_IP}:8080"
+      login_path: "/login.php"
+      success_indicator: "logout"
+      failure_indicator: "incorrect"
+
+  - module: initial_access.command_injection:CommandInjection
+    params:
+      target_url: "http://${TARGET_IP}:8080"
+      vuln_path: "/vulnerabilities/exec/"
+      param_name: "ip"
+
+  - module: credential_access.ssh_brute:SSHBruteForce
+    params:
+      target: "${TARGET_IP}"
+      port: "${SSH_PORT}"
+      username: "fareed"
+      wordlist: "wordlists/passwords.txt"
+      stop_on_first: true
+    continue_on_failure: false
+
+  - module: credential_access.creds_in_files:CredsInFiles
+    params:
+      target: "${TARGET_IP}"
+      port: "${SSH_PORT}"
+
+  - module: discovery.account_discovery:AccountDiscovery
+    params:
+      target: "${TARGET_IP}"
+      port: "${SSH_PORT}"
+
+  - module: discovery.process_discovery:ProcessDiscovery
+    params:
+      target: "${TARGET_IP}"
+      port: "${SSH_PORT}"
+
+  - module: discovery.network_config_discovery:NetworkConfigDiscovery
+    params:
+      target: "${TARGET_IP}"
+      port: "${SSH_PORT}"
+
+  - module: discovery.file_directory_discovery:FileDirectoryDiscovery
+    params:
+      target: "${TARGET_IP}"
+      port: "${SSH_PORT}"
+
+  - module: lateral_movement.ssh_pivot:SSHPivot
+    params:
+      target: "${TARGET_IP}"
+      port: "${SSH_PORT}"
+      probe_command: "id && hostname && uname -a"
+
+  - module: lateral_movement.lateral_tool_transfer:LateralToolTransfer
+    params:
+      target: "${TARGET_IP}"
+      port: "${SSH_PORT}"
+      remote_path: "/tmp/mytre_marker.txt"
+
+  - module: persistence.ssh_authorized_key:SSHAuthorizedKey
+    params:
+      target: "${TARGET_IP}"
+      port: "${SSH_PORT}"
+
+  - module: exfiltration.local_file_stage:LocalFileStage
+    params:
+      paths:
+        - "testdata/stage4-test.txt"
+
+  - module: exfiltration.http_exfil:HTTPExfil
+    params:
+      listener_url: "http://${TARGET_IP}:${RECEIVER_PORT}/upload"
+      archive_name: "full-assessment.zip"
