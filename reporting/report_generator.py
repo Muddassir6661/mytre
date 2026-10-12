@@ -13,12 +13,12 @@ from core.technique import TechniqueResult
 
 
 SEVERITY_MAP = {
-    "reconnaissance": "Informational",
-    "initial-access": "High",
-    "credential-access": "Critical",
-    "lateral-movement": "Critical",
-    "exfiltration": "Critical",
-    "impact": "High",
+    "reconnaissance": "Not assessed",
+    "initial-access": "Not assessed",
+    "credential-access": "Not assessed",
+    "lateral-movement": "Not assessed",
+    "exfiltration": "Not assessed",
+    "impact": "Not assessed",
 }
 
 
@@ -119,9 +119,9 @@ def generate_markdown(campaign_result: CampaignResult) -> str:
         f"Campaign **{r.campaign_name}** ran {total} ATT&CK-mapped technique(s), "
         f"of which {succeeded} succeeded. "
         + (
-            "The engagement achieved full-chain execution from reconnaissance through exfiltration."
-            if succeeded == total
-            else f"{total - succeeded} stage(s) did not achieve their objective."
+            "All configured stages completed successfully."
+            if total > 0 and succeeded == total
+            else f"{total - succeeded} of {total} stage(s) did not achieve their objective."
         ),
         f"",
         f"## Findings Summary",

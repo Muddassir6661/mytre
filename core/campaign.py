@@ -11,6 +11,7 @@ technique does — it only knows the Technique interface from
 core/technique.py. That separation is what lets you add a new
 technique (a new attacks/*.py file) without ever touching this file.
 """
+import re
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -54,27 +55,54 @@ class Campaign:
         self.stages = stages
 
     @classmethod
-    def from_yaml(cls, path: str) -> "Campaign":
+    def from_yaml(cls, path: str, variables: dict | None = None) -> "Campaign":
         with open(path, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
-        if "campaign" not in data or "stages" not in data:
+        if not isinstance(data, dict) or "campaign" not in data or "stages" not in data:
             raise CampaignLoadError(
                 f"{path}: campaign file must define 'campaign' (name) and 'stages' (list)"
             )
+
+        variables = variables or {}
+        placeholder = re.compile(r"\$\{([A-Z_]+)\}")
+
+        def resolve(value):
+            if isinstance(value, dict):
+                return {key: resolve(item) for key, item in value.items()}
+            if isinstance(value, list):
+                return [resolve(item) for item in value]
+            if isinstance(value, str):
+                exact = placeholder.fullmatch(value)
+                if exact:
+                    key = exact.group(1)
+                    if key not in variables:
+                        raise CampaignLoadError(f"Missing campaign variable: {key}")
+                    return variables[key]
+
+                def replace(match):
+                    key = match.group(1)
+                    if key not in variables:
+                        raise CampaignLoadError(f"Missing campaign variable: {key}")
+                    return str(variables[key])
+
+                return placeholder.sub(replace, value)
+            return value
+
+        data = resolve(data)
 
         stages = []
         for i, raw_stage in enumerate(data["stages"]):
             if "module" not in raw_stage:
                 raise CampaignLoadError(f"{path}: stage #{i} is missing 'module'")
-            # "module" is written as e.g. "reconnaissance.port_scan:PortScan"
-            # (dotted path, colon, class name) to keep YAML terse.
+
             module_ref, _, class_name = raw_stage["module"].partition(":")
             if not class_name:
                 raise CampaignLoadError(
                     f"{path}: stage #{i} 'module' must be 'package.module:ClassName' "
                     f"(got {raw_stage['module']!r})"
                 )
+
             stages.append(StageSpec(
                 module_path=f"techniques.{module_ref}",
                 class_name=class_name,
@@ -83,6 +111,7 @@ class Campaign:
             ))
 
         return cls(name=data["campaign"], stages=stages)
+
 
     @staticmethod
     def _instantiate(stage: StageSpec) -> Technique:

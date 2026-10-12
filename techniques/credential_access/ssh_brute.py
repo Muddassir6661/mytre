@@ -44,7 +44,7 @@ class SSHBruteForce(Technique):
     def run(self, context: Context) -> tuple[bool, str, dict[str, Any]]:
         passwords = self._load_wordlist()
         tried = 0
-        valid_creds: list[dict] = []
+        valid_creds: list[str] = []
 
         for password in passwords:
             tried += 1
@@ -63,7 +63,7 @@ class SSHBruteForce(Technique):
                     allow_agent=False,
                 )
                 client.close()
-                valid_creds.append({"username": self.username, "password": password})
+                valid_creds.append(self.username)
                 context.add_credential(
                     username=self.username,
                     password=password,
@@ -80,10 +80,9 @@ class SSHBruteForce(Technique):
                 client.close()
 
         if valid_creds:
-            found = valid_creds[0]
             summary = (
-                f"Valid credential found on {self.target}:{self.port} — "
-                f"{found['username']}:{found['password']} "
+                f"Valid credential found for user {self.username} "
+                f"on {self.target}:{self.port} "
                 f"(tried {tried}/{len(passwords)} passwords)"
             )
         else:
@@ -97,5 +96,5 @@ class SSHBruteForce(Technique):
             "port": self.port,
             "username": self.username,
             "passwords_tried": tried,
-            "valid_credentials": valid_creds,
+            "credential_found": bool(valid_creds),
         }
